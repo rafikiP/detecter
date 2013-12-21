@@ -67,9 +67,9 @@ public Resolve(String name, String domain)
    r = DNSSD.resolve(0, DNSSD.ALL_INTERFACES,
     name, "_http._tcp", domain, this);
   System.out.println("TestResolve Running");
- 
+  Thread.sleep(5000);
   //System.out.println("TestResolve Stopping");
-  //r.stop(  );
+  r.stop(  );
   }
 
 public  void stopResolving()

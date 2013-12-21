@@ -48,9 +48,10 @@ public Listener(  ) throws DNSSDException, InterruptedException
   System.out.println("TestBrowse Starting");
   DNSSDService b = DNSSD.browse("_http._tcp", this);
   System.out.println("TestBrowse Running");
-  Thread.sleep(5000);
+  //Thread.sleep(3000000);
  // System.out.println("TestBrowse Stopping");
-  resolver.stopResolving();
+// if (resolver!=null) 
+ // resolver.stopResolving();
  // b.stop(  );
   }
 
