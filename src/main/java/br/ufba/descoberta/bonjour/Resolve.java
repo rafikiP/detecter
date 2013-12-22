@@ -1,8 +1,11 @@
 package br.ufba.descoberta.bonjour;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
-import java.security.Security;
 
 import javax.ws.rs.core.MediaType;
 
@@ -16,7 +19,8 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.representation.Form;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataMultiPart;
 
 
 
@@ -48,7 +52,12 @@ try {
   
 
 	
-  comunicaServico(hostName);
+  try {
+	comunicaServico(hostName,port,fullName,deviceIp);
+} catch (FileNotFoundException e) {
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+}
 
   
 
@@ -80,19 +89,44 @@ public  void stopResolving()
   System.out.println("TestResolve Stopping");
 }
 
-private void comunicaServico(String name)
+private void comunicaServico(String hostName,int port, String fullname,String deviceIp) throws FileNotFoundException
 {
 	ClientConfig config = new DefaultClientConfig();
 	Client client = Client.create(config);
 	
 
-	WebResource service = client.resource("http://localhost:8080/GeraDevs/geraApp");
+	WebResource service = client.resource("http://localhost:8080/GeraDevs/geraApp/upload");
 
-	Form form = new Form();
+	FormDataMultiPart form = new FormDataMultiPart();
+	form.field("name", fullname);
+	form.field("ip", deviceIp);
+	form.field("host", hostName);
+	form.field("port", String.valueOf(port));
+	 
 	
-	form.add("name", name);
+	File fwadl=new File("R:\\Desenvolvimento\\WorkspaceJavaEE32\\Arquivos de teste\\application.wadl");
+	InputStream wadl= new FileInputStream(fwadl);
+	
+	//FormDataContentDisposition fdcdWadl= FormDataContentDisposition.name("application.wadl").build();
+	
+	FormDataBodyPart fdbpWadl = new FormDataBodyPart("wadl",wadl,
+	    MediaType.APPLICATION_OCTET_STREAM_TYPE);
+	  
+	  
+	File frdf=new File("R:\\Desenvolvimento\\WorkspaceJavaEE32\\Arquivos de teste\\deviceTaxonomy.rdf");
+	InputStream rdf= new FileInputStream(frdf);
+	
+
+	//FormDataContentDisposition fdcdRdf= FormDataContentDisposition.name("deviceTaxonomy.rdf").build();
+	
+	FormDataBodyPart fdbpRdf = new FormDataBodyPart("rdf",rdf,
+	    MediaType.APPLICATION_OCTET_STREAM_TYPE);
+	
+	form.bodyPart(fdbpWadl).bodyPart(fdbpRdf);
+	
+		
 	ClientResponse response = service
-			.type(MediaType.APPLICATION_FORM_URLENCODED)
+			.type(MediaType.MULTIPART_FORM_DATA)
 			.post(ClientResponse.class, form);
 	
 	String StringResponse = response.getEntity(String.class).toString();
